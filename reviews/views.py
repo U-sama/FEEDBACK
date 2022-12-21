@@ -1,44 +1,89 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views import View
+from django.views.generic.base import TemplateView
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormView, CreateView
 
 from .forms import ReviewForm
 from .models import reviews
 
 # Create your views here.
-class ReviewView(View):
-    def get(self, request):
-        form = ReviewForm()
-        return render(request, "reviews/review.html", {"form":form})
+
+class ReviewView(CreateView):
+    model = reviews
+    template_name = "reviews/review.html"
+    form_class = ReviewForm
+    success_url = "/thank-you"
 
 
-    def post(self,request):
-        form = ReviewForm(request.POST)
+# class ReviewView(FormView):
+#     template_name = "reviews/review.html"
+#     form_class = ReviewForm
+#     success_url = "/thank-you"
 
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/thank-you")
+#     def form_valid(self, form):
+#         form.save()
+#         return super().form_valid(form)
 
-        return render(request, "reviews/review.html", {"form":form})
-    
+# class ReviewView(View):
+#     def get(self, request):
+#         form = ReviewForm()
+#         return render(request, "reviews/review.html", {"form":form})
 
-# def review(request):
-#     if request.method == "POST":
+
+#     def post(self,request):
 #         form = ReviewForm(request.POST)
-        
-#         if form.is_valid():
-#             # review = reviews(user_name=form.cleaned_data['user_name'],
-#             # review_text=form.cleaned_data['review_text'],
-#             # rating=form.cleaned_data['rating'])
-#             #review.save()
 
+#         if form.is_valid():
 #             form.save()
 #             return HttpResponseRedirect("/thank-you")
-        
-#     else:
-#         form = ReviewForm()
 
-#     return render(request, "reviews/review.html", {"form":form})
+#         return render(request, "reviews/review.html", {"form":form})
+    
 
-def thank_you(request):
-    return render(request, "reviews/Thank_you.html")
+class Thank_YouView(TemplateView):
+    template_name = "reviews/Thank_you.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["message"] = "This works!"
+        return context
+    
+# class ReviewsListViews(TemplateView):
+#     template_name = "reviews/review_list.html"
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["reviews"] = reviews.objects.all()
+#         return context
+
+class ReviewsListViews(ListView):
+    template_name = "reviews/review_list.html"
+    model = reviews
+    context_object_name = "reviews"
+
+    #To make specific Query
+    # def get_queryset(self):
+    #     base_query =  super().get_queryset()
+    #     data = base_query.filter(rating__gt=4)
+    #     return data
+    
+
+# class ReviewDetailsView(View):
+#     def get (self, request, slug):
+#         review = get_object_or_404(reviews, id=slug)
+#         return render(request, "reviews/review_details.html", {"review":review})
+    
+class ReviewDetailsView(DetailView):
+    template_name = "reviews/review_details.html"
+    model= reviews # We can access it throgh (object, modelName (lowered cased))
+
+# class ReviewDetailsView(TemplateView):
+#     template_name = "reviews/review_details.html"
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         review_id = kwargs["id"]
+#         context["review"] = get_object_or_404(reviews, id=review_id)
+#         return context
+    
