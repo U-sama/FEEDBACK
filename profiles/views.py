@@ -40,3 +40,4 @@ class ProfilesView(ListView):
     model = UserProfile
     template_name = "profiles/user_profile.html"
     context_object_name = "profiles"
+

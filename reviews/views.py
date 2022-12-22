@@ -79,6 +79,15 @@ class ReviewDetailsView(DetailView):
     template_name = "reviews/review_details.html"
     model= reviews # We can access it throgh (object, modelName (lowered cased))
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        loaded_review = self.object
+        request = self.request
+        favourite_id = request.session.get["favourite_review"]
+        context["is_favourite"] = favourite_id == str(loaded_review.id)
+        return context
+    
+
 # class ReviewDetailsView(TemplateView):
 #     template_name = "reviews/review_details.html"
 #     def get_context_data(self, **kwargs):
@@ -87,3 +96,10 @@ class ReviewDetailsView(DetailView):
 #         context["review"] = get_object_or_404(reviews, id=review_id)
 #         return context
     
+
+class AddFavoriteView(View):
+    def post(self, request):
+        review_id = request.POST["review_id"]
+        request.session["favourite_review"] = review_id
+        print()
+        return HttpResponseRedirect(f"/reviews/{review_id}")
